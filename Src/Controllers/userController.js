@@ -1,5 +1,7 @@
 const userService = require("../Services/userService");
-// const doctorModel = require("../Models/userModel");
+const doctorModel = require("../Models/userModel");
+const jsonWebToken = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const createDoctorData = async(req,res) => {
     const doctorData = await userService.createDoctorData(req.body);
@@ -63,8 +65,17 @@ const doctorLogin = async(req,res) => {
             return res.status(401).json({ error: "Incorrect email or password" });
         }
 
-        // Respond with a 200 OK status code and the doctor information
-        return res.status(200).json(existingDoctor);
+         // Respond with a 200 OK status code and the doctor information
+        // return res.status(200).json(existingDoctor);
+        const payload = {
+            username:email,
+            password:password,
+        }
+        const secretKey = crypto.randomBytes(32).toString('hex')
+        const create_jwt = jsonWebToken.sign(payload,secretKey,{expiresIn:'24h'});
+        
+        return res.status(200).json(create_jwt);
+        
     } catch (error) {
         console.error("Error during login:", error);
         
